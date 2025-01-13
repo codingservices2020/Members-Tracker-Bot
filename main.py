@@ -16,6 +16,8 @@ from telegram.ext import (
 # Fetch bot token and allowed group ID from environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 ALLOWED_GROUP_ID = int(os.getenv('ALLOWED_GROUP_ID', 0))  # Default to 0 if not set
+# The number of members needed to trigger the reward
+member_need_to_add = int(os.getenv('member_need_to_add'))
 
 # Validate environment variables
 if not BOT_TOKEN:
@@ -30,10 +32,6 @@ if ALLOWED_GROUP_ID == 0:
 
 # This dictionary will store the count of added members for each user
 user_add_count = {}
-
-# The number of members needed to trigger the reward
-member_need_to_add = 5
-
 
 # Function to create an inline button for checking member count
 async def create_check_count_button(update: Update, context: CallbackContext):
