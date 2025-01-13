@@ -23,9 +23,10 @@ if not BOT_TOKEN:
 if ALLOWED_GROUP_ID == 0:
     raise EnvironmentError("ALLOWED_GROUP_ID environment variable not set or invalid!")
 
-# Set up logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+# # Set up logging
+# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+# logging.getLogger("httpx").setLevel(logging.WARNING)  # Suppress httpx logs
+# logger = logging.getLogger(__name__)
 
 # This dictionary will store the count of added members for each user
 user_add_count = {}
