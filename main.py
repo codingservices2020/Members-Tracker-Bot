@@ -16,8 +16,6 @@ from telegram.ext import (
 
 keep_alive()
 
-# port = int(os.environ.get('PORT', 10000))  # Default to 10000 if no port is set
-# app.run(host='0.0.0.0', port=port)
 
 # Fetch bot token and allowed group ID from environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -25,6 +23,7 @@ BOT_URL = os.getenv('BOT_URL')
 ALLOWED_GROUP_ID = int(os.getenv('ALLOWED_GROUP_ID', 0))  # Default to 0 if not set
 # The number of members needed to trigger the reward
 member_need_to_add = int(os.getenv('member_need_to_add'))
+MSG_DELETE_TIME= int(os.getenv('MSG_DELETE_TIME'))         # time in seconds
 
 # Validate environment variables
 if not BOT_TOKEN:
@@ -77,7 +76,10 @@ async def handle_check_count_callback(update: Update, context: CallbackContext):
         remaining = member_need_to_add - added_count
 
         # Send the user's progress in a pop-up message
-        await update.callback_query.answer(f"You have added {added_count} members.\nYou need to add {remaining} more members for a free plagiarism report!")
+        await update.callback_query.answer(
+            f"You have added {added_count} members.\n"
+            f"You need to add {remaining} more members for a free plagiarism report!"
+        )
     else:
         await update.callback_query.answer("You haven't added any members yet.")
 
@@ -94,7 +96,7 @@ async def create_send_article_button(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send the message with the button
-    message = await update.message.reply_text(
+    await update.message.reply_text(
         f"<b>🔰Added Successfully🔰</b>\n"
         f"Congratulations @{username}! 🎉 You have added {member_need_to_add} members.\n"
         f"Now, you can send your file to our bot for free plagiarism report.",
@@ -102,15 +104,11 @@ async def create_send_article_button(update: Update, context: CallbackContext):
         parse_mode="HTML"
     )
 
-    # Schedule a job to delete the message after 10 seconds
-    context.job_queue.run_once(delete_message, 10, data=(message.chat.id, message.message_id))
-
 
 # Function to delete the message after 10 seconds
 async def delete_message(context: CallbackContext):
     chat_id, message_id = context.job.data
     await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-
 
 
 # Modify the track_new_member function to include the new button
@@ -145,8 +143,8 @@ async def track_new_member(update: Update, context: CallbackContext):
 
 # Function to handle the /count command
 async def count_added_members(update: Update, context: CallbackContext):
-    if update.message.chat.id != ALLOWED_GROUP_ID:
-        return  # Ignore updates from other groups
+    if not update.message or update.message.chat.id != ALLOWED_GROUP_ID:
+        return  # Ignore updates without a message or from other groups
 
     user = update.message.from_user
     user_id = user.id
@@ -160,15 +158,19 @@ async def count_added_members(update: Update, context: CallbackContext):
         if added_count == 0:
             await create_send_article_button(update, context)  # Create the button only when the user reaches the required count
         else:
-            await update.message.reply_text(
+            message = await update.message.reply_text(
                 f"<b>‼️Add More‼️</b>\n"
                 f"Hi @{username}, you have added {added_count} members.\n"
-                f"You need to add {remaining} more members for free plagiarism report!"
+                f"You need to add {remaining} more members for free plagiarism report!",
+                parse_mode="HTML"
             )
+            context.job_queue.run_once(delete_message, MSG_DELETE_TIME, data=(message.chat.id, message.message_id))
     else:
-        await update.message.reply_text(
-            f"Hi @{username}, you haven't added any members yet!"
+        message = await update.message.reply_text(
+            f"Hi @{username}, you haven't added any members yet!",
+            parse_mode="HTML"
         )
+        context.job_queue.run_once(delete_message, MSG_DELETE_TIME, data=(message.chat.id, message.message_id))
 
 
 # Main function to set up the bot
