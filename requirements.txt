@@ -1,4 +1,5 @@
 aiogram==2.23.1
 flask
-python-telegram-bot
+python-telegram-bot[job-queue]
+
 
