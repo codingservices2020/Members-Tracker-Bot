@@ -10,8 +10,8 @@ from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
 )
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Fetch bot token and allowed group ID from environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
