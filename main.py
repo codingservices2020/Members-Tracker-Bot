@@ -11,15 +11,17 @@ from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
 )
-# from dotenv import load_dotenv
-# load_dotenv()
-keep_alive()
+from dotenv import load_dotenv
+load_dotenv()
+
+#keep_alive()
 
 # port = int(os.environ.get('PORT', 10000))  # Default to 10000 if no port is set
 # app.run(host='0.0.0.0', port=port)
 
 # Fetch bot token and allowed group ID from environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+BOT_URL = os.getenv('BOT_URL')
 ALLOWED_GROUP_ID = int(os.getenv('ALLOWED_GROUP_ID', 0))  # Default to 0 if not set
 # The number of members needed to trigger the reward
 member_need_to_add = int(os.getenv('member_need_to_add'))
@@ -100,14 +102,15 @@ async def create_send_article_button(update: Update, context: CallbackContext):
         parse_mode="HTML"
     )
 
-    # Set up a job to delete the message after 5 minutes
-    await context.job_queue.run_once(delete_message, 10, context=(message.chat.id, message.message_id))
+    # Schedule a job to delete the message after 10 seconds
+    context.job_queue.run_once(delete_message, 10, data=(message.chat.id, message.message_id))
 
 
-# Function to delete the message after 5 minutes
+# Function to delete the message after 10 seconds
 async def delete_message(context: CallbackContext):
-    chat_id, message_id = context.job.context
+    chat_id, message_id = context.job.data
     await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+
 
 
 # Modify the track_new_member function to include the new button
