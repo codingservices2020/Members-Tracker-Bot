@@ -1,6 +1,7 @@
 import logging
 import os
 import asyncio
+from keep_alive import keep_alive
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -12,6 +13,10 @@ from telegram.ext import (
 )
 # from dotenv import load_dotenv
 # load_dotenv()
+keep_alive()
+
+port = int(os.environ.get('PORT', 10000))  # Default to 10000 if no port is set
+app.run(host='0.0.0.0', port=port)
 
 # Fetch bot token and allowed group ID from environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
