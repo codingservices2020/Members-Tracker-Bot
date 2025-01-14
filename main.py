@@ -12,6 +12,7 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 import logging
+import telegram.error
 
 # from dotenv import load_dotenv
 # load_dotenv()
