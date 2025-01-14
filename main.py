@@ -11,15 +11,19 @@ from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
 )
+import logging
+
 # from dotenv import load_dotenv
 # load_dotenv()
 
 keep_alive()
 
+
 # Fetch bot token and allowed group ID from environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_URL = os.getenv('BOT_URL')
 ALLOWED_GROUP_ID = int(os.getenv('ALLOWED_GROUP_ID', 0))  # Default to 0 if not set
+ADMIN_CHAT_ID = int(os.getenv('ADMIN_CHAT_ID'))
 # The number of members needed to trigger the reward
 member_need_to_add = int(os.getenv('member_need_to_add'))
 MSG_DELETE_TIME= int(os.getenv('MSG_DELETE_TIME'))         # time in seconds
@@ -109,6 +113,7 @@ async def track_new_member(update: Update, context: CallbackContext):
         return  # Ignore updates from other groups
     user = update.message.from_user
     user_id = user.id
+    user_name = user.username
     username = user.username or user.first_name or "Anonymous"
     # Check if there are new members
     if update.message.new_chat_members:
@@ -127,6 +132,11 @@ async def track_new_member(update: Update, context: CallbackContext):
             added_count = user_add_count[user_id] % member_need_to_add
             remaining = member_need_to_add - added_count
             if added_count == 0 and user_add_count[user_id] > 0:
+                # Notify the admin
+                await context.bot.send_message(
+                    chat_id=ADMIN_CHAT_ID,
+                    text=(f"✅ User @{username} has successfully added {member_need_to_add} members to the group!")
+                )
                 await create_send_article_button(update, context)
             else:
                 await update.message.reply_text(
