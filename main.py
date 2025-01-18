@@ -140,12 +140,16 @@ async def track_new_member(update: Update, context: CallbackContext):
                 )
                 await create_send_article_button(update, context)
             else:
-                await update.message.reply_text(
+                sent_message = await update.message.reply_text(
                     f"<b>🔰ADD MORE🔰</b>\n\n"
                     f"Hi @{username}, you have added {added_count} members.\n"
                     f"You need to add {remaining} more members for free plagiarism report!",
                     parse_mode="HTML"
                 )
+                # Schedule the bot's message for deletion
+                context.job_queue.run_once(delete_message, MSG_DELETE_TIME,
+                                           data=(sent_message.chat.id, sent_message.message_id))
+                
 
 
 
